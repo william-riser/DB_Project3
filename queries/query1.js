@@ -19,4 +19,5 @@ const positions = [
 const result = await collection.aggregate(positions).toArray();
 console.log(result);
 
+
 await client.close();
