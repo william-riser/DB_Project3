@@ -1,17 +1,28 @@
-const express = require('express');
-const { MongoClient, ObjectId } = require('mongodb');
-const redisClient = require('redis');
-const cors = require('cors');
+const express = require("express");
+const { MongoClient, ObjectId } = require("mongodb");
+const redisClient = require("redis");
+const cors = require("cors");
 
 const redis = redisClient.createClient();
 const app = express();
 const port = 3001;
 
-const url = 'mongodb://localhost:27017';
-const database = 'project2';
+const url = "mongodb://localhost:27017";
+const database = "project2";
 
 app.use(cors());
 app.use(express.json());
+
+async function flushRedis() {
+  try {
+    await redis.flushAll();
+    console.log("Redis data flushed successfully");
+  } catch (error) {
+    console.error("Error flushing Redis data:", error);
+  }
+}
+
+flushRedis();
 
 async function connectMongo() {
   const client = await MongoClient.connect(url);
@@ -24,7 +35,6 @@ async function updateFrequentPlayer(userId, playerId) {
   await redis.zincrby(key, 1, JSON.stringify(playerId));
 }
 
-
 // Get the most frequently visited players for a user
 async function getFrequentPlayers(userId) {
   const key = `frequentlyVisited:${userId}`;
@@ -33,10 +43,10 @@ async function getFrequentPlayers(userId) {
 }
 
 // Get all players
-app.get('/players', async (req, res) => {
+app.get("/players", async (req, res) => {
   const db = await connectMongo();
   try {
-    const players = await db.collection('players').find().toArray();
+    const players = await db.collection("players").find().toArray();
     res.json({ data: players });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -46,11 +56,14 @@ app.get('/players', async (req, res) => {
 });
 
 // Get player by name
-app.get('/players', async (req, res) => {
+app.get("/players", async (req, res) => {
   const { name } = req.query;
   const db = await connectMongo();
   try {
-    const players = await db.collection('players').find({ name: { $regex: new RegExp(name, 'i') } }).toArray();
+    const players = await db
+      .collection("players")
+      .find({ name: { $regex: new RegExp(name, "i") } })
+      .toArray();
     res.json({ data: players });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -60,13 +73,15 @@ app.get('/players', async (req, res) => {
 });
 
 // Get player by ID
-app.get('/players/:id', async (req, res) => {
+app.get("/players/:id", async (req, res) => {
   const { id } = req.params;
   const db = await connectMongo();
   try {
-    const player = await db.collection('players').findOne({ _id: ObjectId(id) });
+    const player = await db
+      .collection("players")
+      .findOne({ _id: ObjectId(id) });
     if (!player) {
-      return res.status(404).json({ error: 'Player not found' });
+      return res.status(404).json({ error: "Player not found" });
     }
     await updateFrequentPlayer(1, player._id);
     res.json({ data: player });
@@ -78,7 +93,7 @@ app.get('/players/:id', async (req, res) => {
 });
 
 // Get most frequently visited players for a user
-app.get('/frequentPlayers', async (req, res) => {
+app.get("/frequentPlayers", async (req, res) => {
   try {
     const players = await getFrequentPlayers(1);
     res.json({ data: players });
@@ -88,12 +103,15 @@ app.get('/frequentPlayers', async (req, res) => {
 });
 
 // Add a new player
-app.post('/players', async (req, res) => {
+app.post("/players", async (req, res) => {
   const playerData = req.body;
   const db = await connectMongo();
   try {
-    const result = await db.collection('players').insertOne(playerData);
-    res.json({ message: 'Player added successfully', player_id: result.insertedId });
+    const result = await db.collection("players").insertOne(playerData);
+    res.json({
+      message: "Player added successfully",
+      player_id: result.insertedId,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   } finally {
@@ -102,13 +120,15 @@ app.post('/players', async (req, res) => {
 });
 
 // Update player by ID
-app.put('/players/:id', async (req, res) => {
+app.put("/players/:id", async (req, res) => {
   const { id } = req.params;
   const playerData = req.body;
   const db = await connectMongo();
   try {
-    const result = await db.collection('players').updateOne({ _id: ObjectId(id) }, { $set: playerData });
-    res.json({ message: 'Player updated successfully', player_id: id });
+    const result = await db
+      .collection("players")
+      .updateOne({ _id: ObjectId(id) }, { $set: playerData });
+    res.json({ message: "Player updated successfully", player_id: id });
   } catch (error) {
     res.status(500).json({ error: error.message });
   } finally {
@@ -117,12 +137,14 @@ app.put('/players/:id', async (req, res) => {
 });
 
 // Delete player by ID
-app.delete('/players/:id', async (req, res) => {
+app.delete("/players/:id", async (req, res) => {
   const { id } = req.params;
   const db = await connectMongo();
   try {
-    const result = await db.collection('players').deleteOne({ _id: ObjectId(id) });
-    res.json({ message: 'Player deleted successfully', player_id: id });
+    const result = await db
+      .collection("players")
+      .deleteOne({ _id: ObjectId(id) });
+    res.json({ message: "Player deleted successfully", player_id: id });
   } catch (error) {
     res.status(500).json({ error: error.message });
   } finally {
@@ -133,3 +155,5 @@ app.delete('/players/:id', async (req, res) => {
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
+
+module.exports = { updateFrequentPlayer, getFrequentPlayers };

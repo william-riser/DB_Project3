@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import { updateFrequentPlayer } from '../../server.cjs';
 
 const SearchResultsPage = () => {
     const [searchParams] = useSearchParams(); 
@@ -25,11 +26,8 @@ const SearchResultsPage = () => {
         fetchData();
     }, []);
 
-    const handleAdd = () => {
-        navigate('/addPlayer');
-    }
-
     const handleClick = (playerId) => {
+        updateFrequentPlayer(1, playerId);
         navigate(`/playerCard?id=${playerId}`); 
     };
 
