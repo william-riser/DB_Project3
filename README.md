@@ -3,7 +3,7 @@
 The additions I made for redis can be found in the top of the [Business Requirements](documents/BusinessRequirements.pdf) document
 ***
 ### Redis Structure (Tasks 2 & 3)
-The redis structure and commands can be found in the [Redis Commands](documents/redisCommands.pdf) document
+The redis structure and commands can be found in the [Redis Commands](documents/redisCommands.md) document
 ***
 ### Node + Express (Task 4)
 The redis and mongo code can be found in the [server](/server.cjs) file.
