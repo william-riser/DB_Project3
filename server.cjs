@@ -1,5 +1,6 @@
 const express = require('express');
 const { MongoClient, ObjectId } = require('mongodb');
+const { redisClient } = require('./redis');
 const cors = require('cors');
 
 const app = express();
