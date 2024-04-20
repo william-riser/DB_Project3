@@ -1,37 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
 import CustomAlert from './customAlert';
-
-
 
 const HomePage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showAlert, setShowAlert] = useState(false);
+  const [loading, setLoading] = useState(false);
 
+  const navigate = useNavigate();
 
-  const navigate = useNavigate(); 
   const handleSearch = async () => {
-    // Validate if searchTerm is not empty
     if (!searchTerm.trim()) {
-        setShowAlert(true);
-        return;
-      }
+      setShowAlert(true);
+      return;
+    }
 
     try {
-      const result = await axios.get(`http://localhost:3001/data?name=${searchTerm}`);
-      console.log('API Response:', result.data.data);
-      navigate(`/searchResults?name=${searchTerm}`);
+      setLoading(true);
+      const encodedSearchTerm = encodeURIComponent(searchTerm);
+      const response = await axios.get(`http://localhost:3001/players?name=${encodedSearchTerm}`);
+      const players = response.data.data;
+      if (players.length > 0) {
+        navigate(`/searchResults?name=${encodedSearchTerm}`);
+      } else {
+        // Handle case where no players match the search term
+        console.log('No matching players found');
+      }
     } catch (error) {
-      console.error(error);
+      console.error('Error searching players:', error);
+      // Handle error, e.g., show error message to the user
+    } finally {
+      setLoading(false);
     }
   };
 
   const closeAlert = () => {
     setShowAlert(false);
   };
-
-
 
   return (
     <div className="min-h-screen flex flex-col items-center inset-0 justify-center bg-gray-100 relative" style={{ backgroundImage: "url(/public/bg.jpg)" }}>
@@ -78,4 +84,3 @@ const HomePage = () => {
     }
 
     export default HomePage;
-   

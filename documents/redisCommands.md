@@ -9,7 +9,7 @@ To keep track of the most frequently visited players for each user, I will use a
 
 ### Task 3:
 These are the commands I will use to accomplish the following tasks in the Redis database:
-1. Initialize
+1. Delete
     - FLUSHALL
     - Clear all previous data
 2. Create
@@ -19,5 +19,3 @@ These are the commands I will use to accomplish the following tasks in the Redis
 4. Update
     - ZINCRBY frequentlyVisited:userId 1 "{name: John Doe, age: 19, ...}"
     - Increase the score of the player by 1 every time the user visits their page
-5. Delete
-    - 

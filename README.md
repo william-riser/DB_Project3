@@ -1,4 +1,4 @@
-# CS3200-Project2
+# CS3200-Project3
 ### Redis Addition (Task 1)
 The additions I made for redis can be found in the top of the [Business Requirements](documents/BusinessRequirements.pdf) document
 ***
